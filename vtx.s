@@ -478,16 +478,6 @@ ept_violations:
 	jmp	v.0
 	mov	r8,VMCS_EXIT_QUALIFICATION
 	vmread	rax,r8
-	push	rax
-	and	al,3
-	cmp	al,3
-	je	lock_mem
-	pop	rax
-	test	al,1		#data read
-	jnz	mem_to_reg
-	test	al,2 
-	jnz	reg_to_mem
-#	jmp	$
 	mov	r8,VMCS_VMEXIT_INSTRUCTION_LEN
 	vmread	r9,r8
 	
@@ -536,80 +526,6 @@ v.0:
 	mov	rax,[r8]
 	add	edi,2
 	call	hex64
-	jmp	$
-reg_to_mem:			#write memory
-	mov	r8,VMCS_GUEST_RIP
-	vmread	rsi,r8
-	mov	ebx,esi
-	mov	r8,VMCS_VMEXIT_INSTRUCTION_LEN
-	vmread	rcx,r8
-	cld	
-	lodsb
-	cmp	al,0x87		#XCHG 
-	je	xchg_reg
-rtm.0:
-	add	ebx,ecx
-	mov	rdx,[guest_rdx]
-rtm.1:
-	mov	r8,VMCS_GUEST_RIP
-	vmwrite	r8,rbx
-	jmp	vm_resume
-xchg_reg:
-	lodsb
-	cmp	al,0x6
-	je	xchg_eax
-	cmp	al,0x16
-	je	xchg_edx
-	jmp	$
-xchg_eax:
-	mov	eax,-1
-	mov	[guest_rax],rax
-	mov	ebx,esi
-	jmp	rtm.0
-xchg_edx:
-	mov	edx,-1
-	mov	ebx,esi
-	jmp	rtm.0
-lock_mem:
-	jmp	reg_to_mem
-#
-#read memory
-#
-mem_to_reg:
-	mov	r8,VMCS_GUEST_RIP
-	vmread	rsi,r8
-	mov	ebx,esi
-	mov	r8,VMCS_VMEXIT_INSTRUCTION_LEN
-	vmread	rcx,r8
-	cld
-	lodsb
-	cmp	al,0x8b
-	je	mov_reg
-	jmp	$
-mov_reg:
-	lodsb
-	cmp	al,0x6
-	je	reg_eax
-	cmp	al,0x16
-	je	reg_edx
-	jmp	v.0
-reg_eax:
-	mov	eax,-1
-	mov	[guest_rax],rax
-m.0:
-	add	ebx,ecx
-	mov	r8,VMCS_GUEST_RIP
-	vmwrite	r8,rbx
-	jmp	vm_resume
-reg_edx:
-	mov	rdx,-1
-	jmp	m.0
-#	mov	[guest_rdx],rax
-	jmp	vm_resume
-
-	mov	edi,0xb8000+160*10
-	mov	eax,[rcx]
-	call	hex32
 	jmp	$
 	.global	rmsr
 rmsr:
