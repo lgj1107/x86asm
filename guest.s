@@ -90,21 +90,6 @@ putc:
 msg:	.ascii	"cr0=0x00000000"
 	.byte	0xa,0xd
 	.byte	0x0	
-gdt16:
-	.quad	0x0
-	.quad	0x00cf9a000000ffff
-	.quad	0x00cf92000000ffff
-#tss_sel
-	.word	0x0			#limit	15-0
-	.word	0			#base address 15 - 0 
-	.byte	0x0			#base address 23 -16
-	.byte	0x0
-	.byte	0x0			#G_0_0_AVL_LIMIT
-	.byte	0x0			#BASE 31_24
-	.quad	0x00009b000000ffff	#0x20
-	.quad	0x000093000000ffff	#0x28
-gdtr:	.word	6*8-1
-	.long	gdt16
 	.p2align 2
 disk_pack:
 	.byte	0x10		#struct size 0x10 or 0x18
