@@ -2,7 +2,7 @@ OBJS = boot2.o apic.o int.o keyb.o vtx.o libs.o
 reloc=0x80000000
 all:new
 %.o:%.s
-	as --64 -o $@ $<
+	as -o $@ $<
 boot0:boot0.o
 	ld -N -e start -Ttext=0x600 -o boot0.out boot0.o
 	objcopy -S -O binary boot0.out $@
@@ -24,11 +24,11 @@ te:$(OBJS)
 new:boot0 boot1 boot2 guest
 	cat boot0 boot1 boot2 guest>new
 clean:
-	rm -f boot[0-9].o boot[0-9].out new real.iso guest.o guest.out guest $(OBJS)
+	rm -f boot[0-9].o boot[0-9].out new real.iso guest.o guest.out guest $(OBJS) boot[0-9]
 ddisk:
 	dd if=new of=c.img conv=notrunc	
 mmc:
-	dd if=new of=/dev/sdb conv=sync
+	dd if=new of=/dev/sdc conv=sync
 nombr:
 	cat boot1 boot2 guest > n1
 iso:

@@ -115,8 +115,9 @@ int.2:
 
 	mov	al,18
 	mov	cl,1
+	xor	dx,dx
 	mov	bx,[load_addr]
-	mov	di,0x512*18
+	mov	di,512*18
 	add	[load_addr],di
 	dec	si
 	jnz	int.1
